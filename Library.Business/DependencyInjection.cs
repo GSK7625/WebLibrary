@@ -22,12 +22,14 @@ public static class DependencyInjection
         services.AddScoped<ILateFeeStrategy, MagazineFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, ForeignBookFeeStrategy>();
 
-        // Register Legacy Calculator (phục vụ đối chiếu demo OCP)
+        // Register Legacy Calculator (phục vụ đối chiếu demo OCP & SRP)
         services.AddSingleton<LegacyFeeCalculator>();
+        services.AddScoped<BadBorrowManager>();
 
         // Register Application Services với Interfaces tương ứng
         services.AddScoped<ILateFeeApplicationService, LateFeeApplicationService>();
         services.AddScoped<IBookApplicationService, BookApplicationService>();
+        services.AddScoped<IBorrowApplicationService, BorrowApplicationService>();
 
         return services;
     }

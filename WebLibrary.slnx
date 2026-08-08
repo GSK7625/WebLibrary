@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Library.Presentation/Library.Presentation.csproj" />
+  <Project Path="Library.Business/Library.Business.csproj" />
+  <Project Path="Library.DataAccess/Library.DataAccess.csproj" />
+  <Project Path="Library.Domain/Library.Domain.csproj" />
+</Solution>

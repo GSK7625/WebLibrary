@@ -22,7 +22,7 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "M?t ngo?i l? x?y ra: {Message}", ex.Message);
+            _logger.LogError(ex, "Mot ngoai le xay ra: {Message}", ex.Message);
             await HandleExceptionAsync(context, ex);
         }
     }

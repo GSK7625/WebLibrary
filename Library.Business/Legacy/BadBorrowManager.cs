@@ -1,17 +1,18 @@
-﻿using Library.DataAccess.Interfaces;
-using Library.Domain.Enums;
+using Library.Business.Entities;
+using Library.Business.Enums;
+using Library.Business.Interfaces;
 
 namespace Library.Business.Legacy;
 
 /// <summary>
-/// CLASS VI PH?M SRP (Single Responsibility Principle) - D�NH CHO TV3 DEMO
-/// Class n�y �m d?m t?i 5 tr�ch nhi?m kh�c nhau trong c�ng 1 noi:
-/// 1. Validation quy t?c mu?n/tr?
-/// 2. Thao t�c v� c?p nh?t d? li?u (Persistence)
-/// 3. T�nh to�n ti?n ph?t (Business Logic - �m lu�n switch-case)
-/// 4. �?nh d?ng van b?n h�a don/th�ng b�o (Formatting)
-/// 5. Ghi log h? th?ng (Logging)
-/// ? C� 5 L� DO �? THAY �?I class n�y (Vi ph?m nghi�m tr?ng SRP)!
+/// CLASS VI PHAM SRP (Single Responsibility Principle) - DANH CHO DEMO
+/// Class nay om dom toi 5 trach nhiem khac nhau trong cung 1 noi:
+/// 1. Validation quy tac muon/tra
+/// 2. Thao tac va cap nhat du lieu (Persistence)
+/// 3. Tinh toan tien phat (Business Logic - Om luan switch-case)
+/// 4. Dinh dang van ban hoa don/thong bao (Formatting)
+/// 5. Ghi log he thong (Logging)
+/// -> Co 5 LY DO DE THAY DOI class nay (Vi pham nghiem trong SRP)!
 /// </summary>
 public class BadBorrowManager
 {
@@ -28,31 +29,31 @@ public class BadBorrowManager
 
     public async Task<object> ReturnBookBadSRPAsync(int borrowRecordId, DateTime? actualReturnedDate = null)
     {
-        // ? TR�CH NHI?M 1: Validation d? li?u & quy t?c mu?n tr?
+        // TRACH NHIEM 1: Validation du lieu & quy tac muon tra
         var record = await _borrowRepository.GetByIdAsync(borrowRecordId);
         if (record is null)
         {
-            throw new KeyNotFoundException($"[SRP Violation] Kh�ng t�m th?y phi?u mu?n Id = {borrowRecordId}");
+            throw new KeyNotFoundException($"[SRP Violation] Khong tim thay phieu muon Id = {borrowRecordId}");
         }
 
         if (record.ReturnedDate.HasValue)
         {
-            throw new InvalidOperationException($"[SRP Violation] Phi?u mu?n Id = {borrowRecordId} d� tr? tru?c d� v�o ng�y {record.ReturnedDate.Value:dd/MM/yyyy HH:mm}.");
+            throw new InvalidOperationException($"[SRP Violation] Phieu muon Id = {borrowRecordId} da tra truoc do vao ngay {record.ReturnedDate.Value:dd/MM/yyyy HH:mm}.");
         }
 
         var returnedDate = actualReturnedDate ?? DateTime.Now;
         if (returnedDate < record.BorrowDate)
         {
-            throw new ArgumentException("[SRP Violation] Ng�y tr? s�ch kh�ng du?c nh? hon ng�y mu?n s�ch.");
+            throw new ArgumentException("[SRP Violation] Ngay tra sach khong duoc nho hon ngay muon sach.");
         }
 
         var book = await _bookRepository.GetByIdAsync(record.BookId);
         if (book is null)
         {
-            throw new KeyNotFoundException($"[SRP Violation] Kh�ng t�m th?y s�ch li�n k?t Id = {record.BookId}");
+            throw new KeyNotFoundException($"[SRP Violation] Khong tim thay sach lien ket Id = {record.BookId}");
         }
 
-        // ? TR�CH NHI?M 2: Business Logic - T�nh s? ng�y tr? & Switch-case t�nh ti?n ph?t
+        // TRACH NHIEM 2: Business Logic - Tinh so ngay tre & Switch-case tinh tien phat
         int daysLate = 0;
         if (returnedDate > record.DueDate)
         {
@@ -62,7 +63,7 @@ public class BadBorrowManager
         decimal lateFee = 0;
         if (daysLate > 0)
         {
-            // T? t�nh ti?n ph?t b?ng switch-case (�m lu�n tr�ch nhi?m t�nh to�n c?a Strategy Pattern)
+            // Tu tinh tien phat bang switch-case (om luan trach nhiem tinh toan cua Strategy Pattern)
             switch (book.Type)
             {
                 case BookType.Regular: lateFee = daysLate * 2000m; break;
@@ -74,27 +75,27 @@ public class BadBorrowManager
             }
         }
 
-        // ? TR�CH NHI?M 3: Persistence - Tr?c ti?p c?p nh?t tr?ng th�i d? li?u
+        // TRACH NHIEM 3: Persistence - Truc tiep cap nhat trang thai du lieu
         record.ReturnedDate = returnedDate;
         record.LateFee = lateFee;
         book.IsBorrowed = false;
 
         await _borrowRepository.UpdateAsync(record);
 
-        // ? TR�CH NHI?M 4: Formatting - T? d?nh d?ng chu?i van b?n h�a don x�c nh?n tr? s�ch
-        string receiptText = $"=== H�A �ON X�C NH?N TR? S�CH (VI PH?M SRP) ===\n" +
-                             $"Phi?u mu?n: #{record.Id}\n" +
-                             $"Ngu?i mu?n: {record.BorrowerName}\n" +
-                             $"S�ch: {book.Title} ({book.Type})\n" +
-                             $"Ng�y mu?n: {record.BorrowDate:dd/MM/yyyy HH:mm}\n" +
-                             $"H?n tr?: {record.DueDate:dd/MM/yyyy HH:mm}\n" +
-                             $"Ng�y tr? th?c t?: {returnedDate:dd/MM/yyyy HH:mm}\n" +
-                             $"S? ng�y tr?: {daysLate} ng�y\n" +
-                             $"Ph� ph?t tr? h?n: {lateFee:N0} VN�\n" +
+        // TRACH NHIEM 4: Formatting - Tu dinh dang chuoi van ban hoa don xac nhan tra sach
+        string receiptText = $"=== HOA DON XAC NHAN TRA SACH (VI PHAM SRP) ===\n" +
+                             $"Phieu muon: #{record.Id}\n" +
+                             $"Nguoi muon: {record.BorrowerName}\n" +
+                             $"Sach: {book.Title} ({book.Type})\n" +
+                             $"Ngay muon: {record.BorrowDate:dd/MM/yyyy HH:mm}\n" +
+                             $"Han tra: {record.DueDate:dd/MM/yyyy HH:mm}\n" +
+                             $"Ngay tra thuc te: {returnedDate:dd/MM/yyyy HH:mm}\n" +
+                             $"So ngay tre: {daysLate} ngay\n" +
+                             $"Phi phat tra han: {lateFee:N0} VND\n" +
                              $"===============================================";
 
-        // ? TR�CH NHI?M 5: Logging / Notification - T? ghi log h? th?ng
-        Console.WriteLine($"[LOG BAD SRP] X? l� tr? s�ch phi?u #{record.Id} l�c {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        // TRACH NHIEM 5: Logging / Notification - Tu ghi log he thong
+        Console.WriteLine($"[LOG BAD SRP] Xu ly tra sach phieu #{record.Id} luc {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         Console.WriteLine(receiptText);
 
         return new
@@ -105,9 +106,8 @@ public class BadBorrowManager
             DaysLate = daysLate,
             LateFee = lateFee,
             ReceiptText = receiptText,
-            Method = "BadBorrowManager (VI PH?M SRP)",
-            SrpViolationReason = "1 Class duy nh?t �m 5 tr�ch nhi?m: Validation + Persistence + Switch-case Calculation + Invoice Formatting + Console Logging"
+            Method = "BadBorrowManager (VI PHAM SRP)",
+            SrpViolationReason = "1 Class duy nhat om 5 trach nhiem: Validation + Persistence + Switch-case Calculation + Invoice Formatting + Console Logging"
         };
     }
 }
-

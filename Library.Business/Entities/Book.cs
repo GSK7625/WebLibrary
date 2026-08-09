@@ -1,5 +1,7 @@
-using Library.Domain.Enums;
-namespace Library.Domain.Entities;
+using Library.Business.Enums;
+
+namespace Library.Business.Entities;
+
 public class Book
 {
     public int Id { get; set; }
@@ -9,4 +11,3 @@ public class Book
     public BookType Type { get; set; }
     public bool IsBorrowed { get; set; }
 }
-

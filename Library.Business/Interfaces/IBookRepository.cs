@@ -1,6 +1,6 @@
-using Library.Domain.Entities;
+using Library.Business.Entities;
 
-namespace Library.DataAccess.Interfaces;
+namespace Library.Business.Interfaces;
 
 public interface IBookRepository
 {

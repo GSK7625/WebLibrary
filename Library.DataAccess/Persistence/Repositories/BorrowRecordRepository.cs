@@ -1,5 +1,5 @@
-using Library.Domain.Entities;
-using Library.DataAccess.Interfaces;
+using Library.Business.Entities;
+using Library.Business.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.DataAccess.Persistence.Repositories;

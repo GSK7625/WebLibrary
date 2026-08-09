@@ -1,6 +1,6 @@
-﻿using Library.Business.DTOs;
+using Library.Business.DTOs;
 
-namespace Library.Business.Services.Interfaces;
+namespace Library.Business.Interfaces;
 
 public interface IBorrowApplicationService
 {

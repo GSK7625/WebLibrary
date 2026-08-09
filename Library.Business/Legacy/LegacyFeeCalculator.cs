@@ -1,5 +1,5 @@
-using Library.Domain.Entities;
-using Library.Domain.Enums;
+using Library.Business.Entities;
+using Library.Business.Enums;
 
 namespace Library.Business.Legacy;
 
@@ -9,15 +9,14 @@ public class LegacyFeeCalculator
     {
         if (daysLate <= 0) return 0;
 
-        switch (book.Type)
+        return book.Type switch
         {
-            case BookType.Regular: return daysLate * 2000m;
-            case BookType.Rare: return daysLate * 10000m;
-            case BookType.Textbook: return daysLate * 3000m;
-            case BookType.Magazine: return daysLate * 1000m;
-            default:
-                throw new NotSupportedException($"Lo?i sách '{book.Type}' chua du?c h? tr? trong switch-case (Vi ph?m OCP!)");
-        }
+            BookType.Regular => daysLate * 5000m,
+            BookType.Rare => daysLate * 20000m,
+            BookType.Textbook => daysLate * 3000m,
+            BookType.Magazine => daysLate * 2000m,
+            BookType.Foreign => daysLate * 10000m,
+            _ => daysLate * 5000m
+        };
     }
 }
-

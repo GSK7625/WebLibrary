@@ -1,5 +1,5 @@
 using Library.Business;
-using Library.DataAccess.Interfaces;
+using Library.DataAccess;
 using Library.Presentation.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +12,8 @@ builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Đăng ký toàn bộ dịch vụ của tầng Business & DataAccess qua Extension Method
+// Dang ky dich vu cua tang DataAccess & Business qua Extension Methods
+builder.Services.AddDataAccessServices(builder.Configuration);
 builder.Services.AddBusinessServices(builder.Configuration);
 
 var app = builder.Build();
@@ -31,20 +32,8 @@ app.UseSwaggerUI(c =>
 app.UseAuthorization();
 app.MapControllers();
 
-// Auto seed database on startup thông qua IDatabaseInitializer
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var dbInitializer = services.GetRequiredService<IDatabaseInitializer>();
-        await dbInitializer.InitializeAsync(forceRecreate: false);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Lỗi xảy ra khi khởi tạo dữ liệu Database!");
-    }
-}
+// Auto seed database on startup thong qua Business Layer extension
+await app.Services.InitializeDatabaseAsync();
 
 app.Run();
+

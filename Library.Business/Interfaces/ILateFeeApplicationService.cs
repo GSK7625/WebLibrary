@@ -1,6 +1,6 @@
-using Library.Domain.Enums;
+using Library.Business.Enums;
 
-namespace Library.Business.Services.Interfaces;
+namespace Library.Business.Interfaces;
 
 public interface ILateFeeApplicationService
 {

@@ -1,6 +1,6 @@
-using Library.Business.Services.Interfaces;
+using Library.Business.Interfaces;
 using Library.Business.Strategies;
-using Library.Domain.Enums;
+using Library.Business.Enums;
 
 namespace Library.Business.Services;
 
@@ -19,7 +19,7 @@ public class LateFeeApplicationService : ILateFeeApplicationService
 
         var strategy = _strategies.FirstOrDefault(s => s.SupportedType == type);
         if (strategy == null)
-            throw new InvalidOperationException($"Chưa hỗ trợ loại sách: {type}");
+            throw new InvalidOperationException($"Chua ho tro loai sach: {type}");
 
         return strategy.CalculateFee(daysLate);
     }

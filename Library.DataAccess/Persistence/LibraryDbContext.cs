@@ -1,4 +1,4 @@
-﻿using Library.Domain.Entities;
+using Library.Business.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.DataAccess.Persistence;

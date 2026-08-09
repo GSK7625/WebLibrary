@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Library.Business.DTOs;
-using Library.Business.Services.Interfaces;
+using Library.Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Presentation.Controllers;
@@ -17,7 +17,7 @@ public class BooksController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả sách
+    /// Lay danh sach tat ca sach
     /// </summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks()
@@ -27,20 +27,20 @@ public class BooksController : ControllerBase
     }
 
     /// <summary>
-    /// Tính thử phí trả hạn (Chuẩn OCP - Strategy Pattern)
+    /// Tinh thu phi tra han (Chuan OCP - Strategy Pattern)
     /// </summary>
     [HttpGet("{id}/fee-preview")]
-    public async Task<ActionResult<FeePreviewDto>> PreviewFee(int id, [FromQuery, Range(0, 365, ErrorMessage = "Số ngày trễ phải từ 0 đến 365 ngày")] int daysLate)
+    public async Task<ActionResult<FeePreviewDto>> PreviewFee(int id, [FromQuery, Range(0, 365, ErrorMessage = "So ngay tre phai tu 0 den 365 ngay")] int daysLate)
     {
         var result = await _bookService.PreviewFeeAsync(id, daysLate);
         return Ok(result);
     }
 
     /// <summary>
-    /// Tính thử phí trả hạn (Legacy - Vi phạm OCP)
+    /// Tinh thu phi tra han (Legacy - Vi pham OCP)
     /// </summary>
     [HttpGet("{id}/legacy-fee-preview")]
-    public async Task<ActionResult<FeePreviewDto>> PreviewFeeLegacy(int id, [FromQuery, Range(0, 365, ErrorMessage = "Số ngày trễ phải từ 0 đến 365 ngày")] int daysLate)
+    public async Task<ActionResult<FeePreviewDto>> PreviewFeeLegacy(int id, [FromQuery, Range(0, 365, ErrorMessage = "So ngay tre phai tu 0 den 365 ngay")] int daysLate)
     {
         var result = await _bookService.PreviewLegacyFeeAsync(id, daysLate);
         return Ok(result);

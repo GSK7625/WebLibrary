@@ -1,7 +1,6 @@
-﻿using Library.Business.DTOs;
-using Library.Business.Services.Interfaces;
-using Library.DataAccess.Interfaces;
-using Library.Domain.Entities;
+using Library.Business.DTOs;
+using Library.Business.Interfaces;
+using Library.Business.Entities;
 
 namespace Library.Business.Services;
 
@@ -41,23 +40,23 @@ public class BorrowApplicationService : IBorrowApplicationService
     {
         if (string.IsNullOrWhiteSpace(request.BorrowerName))
         {
-            throw new ArgumentException("Tên người mượn không được để trống.");
+            throw new ArgumentException("Ten nguoi muon khong duoc de trong.");
         }
 
         if (request.BorrowDays <= 0)
         {
-            throw new ArgumentException("Số ngày mượn phải lớn hơn 0.");
+            throw new ArgumentException("So ngay muon phai lon hon 0.");
         }
 
         var book = await _bookRepository.GetByIdAsync(request.BookId);
         if (book is null)
         {
-            throw new KeyNotFoundException($"Không tìm thấy sách có Id = {request.BookId}");
+            throw new KeyNotFoundException($"Khong tim thay sach co Id = {request.BookId}");
         }
 
         if (book.IsBorrowed)
         {
-            throw new InvalidOperationException($"Sách '{book.Title}' đang được mượn, không thể mượn tiếp.");
+            throw new InvalidOperationException($"Sach '{book.Title}' dang duoc muon, khong the muon tiep.");
         }
 
         var borrowDate = DateTime.Now;
@@ -93,34 +92,34 @@ public class BorrowApplicationService : IBorrowApplicationService
         var record = await _borrowRepository.GetByIdAsync(borrowRecordId);
         if (record is null)
         {
-            throw new KeyNotFoundException($"Không tìm thấy phiếu mượn có Id = {borrowRecordId}");
+            throw new KeyNotFoundException($"Khong tim thay phieu muon co Id = {borrowRecordId}");
         }
 
         if (record.ReturnedDate.HasValue)
         {
-            throw new InvalidOperationException($"Phiếu mượn Id = {borrowRecordId} đã được trả trước đó vào ngày {record.ReturnedDate.Value:dd/MM/yyyy HH:mm}.");
+            throw new InvalidOperationException($"Phieu muon Id = {borrowRecordId} da duoc tra truoc do vao ngay {record.ReturnedDate.Value:dd/MM/yyyy HH:mm}.");
         }
 
         var returnedDate = actualReturnedDate ?? DateTime.Now;
         if (returnedDate < record.BorrowDate)
         {
-            throw new ArgumentException("Ngày trả sách không được nhỏ hơn ngày mượn sách.");
+            throw new ArgumentException("Ngay tra sach khong duoc nho hon ngay muon sach.");
         }
 
         var book = await _bookRepository.GetByIdAsync(record.BookId);
         if (book is null)
         {
-            throw new KeyNotFoundException($"Không tìm thấy sách liên kết với phiếu mượn (BookId = {record.BookId})");
+            throw new KeyNotFoundException($"Khong tim thay sach lien ket voi phieu muon (BookId = {record.BookId})");
         }
 
-        // Tính số ngày trễ
+        // Tinh so ngay tre
         int daysLate = 0;
         if (returnedDate > record.DueDate)
         {
             daysLate = (int)Math.Ceiling((returnedDate - record.DueDate).TotalDays);
         }
 
-        // Tính phí bằng LateFeeApplicationService (Strategy Pattern OCP)
+        // Tinh phi bang LateFeeApplicationService (Strategy Pattern OCP)
         decimal lateFee = _lateFeeService.CalculateFee(book.Type, daysLate);
 
         record.ReturnedDate = returnedDate;
@@ -141,8 +140,8 @@ public class BorrowApplicationService : IBorrowApplicationService
             LateFee = lateFee,
             FeeCalculationMethod = "Strategy Pattern (OCP)",
             Message = daysLate > 0
-                ? $"Trả sách trễ {daysLate} ngày. Phí trả hạn là {lateFee:N0} VNĐ ({book.Type})"
-                : "Trả sách đúng hạn. Không phát sinh phí trả hạn."
+                ? $"Tra sach tre {daysLate} ngay. Phi tra han la {lateFee:N0} VND ({book.Type})"
+                : "Tra sach dung han. Khong phat sinh phi tra han."
         };
     }
 }

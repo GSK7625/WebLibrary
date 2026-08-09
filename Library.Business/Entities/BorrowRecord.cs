@@ -1,4 +1,4 @@
-namespace Library.Domain.Entities;
+namespace Library.Business.Entities;
 
 public class BorrowRecord
 {
@@ -11,4 +11,3 @@ public class BorrowRecord
     public DateTime? ReturnedDate { get; set; }
     public decimal? LateFee { get; set; }
 }
-

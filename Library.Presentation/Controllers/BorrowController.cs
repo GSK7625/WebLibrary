@@ -1,6 +1,6 @@
-﻿using Library.Business.DTOs;
+using Library.Business.DTOs;
 using Library.Business.Legacy;
-using Library.Business.Services.Interfaces;
+using Library.Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Presentation.Controllers;
@@ -21,7 +21,7 @@ public class BorrowController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy toàn bộ lịch sử mượn / trả sách
+    /// Lay toan bo lich su muon / tra sach
     /// </summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BorrowRecordDto>>> GetAll()
@@ -31,7 +31,7 @@ public class BorrowController : ControllerBase
     }
 
     /// <summary>
-    /// Mượn sách (Tạo BorrowRecord)
+    /// Muon sach (Tao BorrowRecord)
     /// </summary>
     [HttpPost]
     public async Task<ActionResult<BorrowRecordDto>> BorrowBook([FromBody] BorrowRequestDto request)
@@ -41,7 +41,7 @@ public class BorrowController : ControllerBase
     }
 
     /// <summary>
-    /// Trả sách - Chuẩn SRP (Phân tách rõ ràng giữa Repository, Fee Strategy & Application Service)
+    /// Tra sach - Chuan SRP (Phan tach ro rang giua Repository, Fee Strategy & Application Service)
     /// </summary>
     [HttpPost("{id}/return")]
     public async Task<ActionResult<ReturnBookResponseDto>> ReturnBook(int id, [FromBody] ReturnBookRequestDto? request)
@@ -51,7 +51,7 @@ public class BorrowController : ControllerBase
     }
 
     /// <summary>
-    /// Trả sách - Demo VI PHẠM SRP (1 Class BadBorrowManager ôm 5 trách nhiệm)
+    /// Tra sach - Demo VI PHAM SRP (1 Class BadBorrowManager om 5 trach nhiem)
     /// </summary>
     [HttpPost("{id}/return-srp-violation")]
     public async Task<IActionResult> ReturnBookSrpViolation(int id, [FromBody] ReturnBookRequestDto? request)

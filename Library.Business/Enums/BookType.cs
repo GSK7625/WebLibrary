@@ -1,4 +1,4 @@
-namespace Library.Domain.Enums;
+namespace Library.Business.Enums;
 
 public enum BookType
 {
@@ -8,5 +8,3 @@ public enum BookType
     Magazine = 4, // Tạp chí
     Foreign = 5   // Sách ngoại văn (Loại mới mở rộng)
 }
-
-

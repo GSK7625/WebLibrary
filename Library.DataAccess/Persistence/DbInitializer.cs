@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
-using Library.Domain.Entities;
-using Library.Domain.Enums;
+using System.Text.Json;
+using Library.Business.Entities;
+using Library.Business.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.DataAccess.Persistence;
@@ -18,7 +18,7 @@ public static class DbInitializer
             context.BorrowRecords.RemoveRange(context.BorrowRecords);
             context.Books.RemoveRange(context.Books);
             await context.SaveChangesAsync();
-            Console.WriteLine("[DbInitializer] Đã xóa toàn bộ dữ liệu cũ thành công!");
+            Console.WriteLine("[DbInitializer] Da xoa toan bo du lieu cu thanh cong!");
         }
         else if (await context.Books.AnyAsync())
         {
@@ -42,7 +42,7 @@ public static class DbInitializer
         await context.Books.AddRangeAsync(realBooks);
         await context.SaveChangesAsync();
 
-        // Seed lịch sử mượn trả thực tế với các mã sách thật vừa nạp
+        // Seed lich su muon tra thuc te voi cac ma sach that vua nap
         var savedBooks = await context.Books.ToListAsync();
         if (savedBooks.Count >= 5)
         {
@@ -51,43 +51,43 @@ public static class DbInitializer
             {
                 new BorrowRecord
                 {
-                    BookId = savedBooks[0].Id, // Sách 1
-                    BorrowerName = "Lê Văn Hùng",
+                    BookId = savedBooks[0].Id, // Sach 1
+                    BorrowerName = "Le Van Hung",
                     BorrowDate = now.AddDays(-15),
                     DueDate = now.AddDays(-5),
-                    ReturnedDate = null, // Quá hạn 5 ngày
+                    ReturnedDate = null, // Qua han 5 ngay
                     LateFee = null
                 },
                 new BorrowRecord
                 {
-                    BookId = savedBooks[1].Id, // Sách 2 (Foreign / Rare)
-                    BorrowerName = "Phạm Thị Minh",
+                    BookId = savedBooks[1].Id, // Sach 2 (Foreign / Rare)
+                    BorrowerName = "Pham Thi Minh",
                     BorrowDate = now.AddDays(-20),
                     DueDate = now.AddDays(-10),
                     ReturnedDate = now.AddDays(-8),
-                    LateFee = 10000m // Đã trả trễ 2 ngày
+                    LateFee = 10000m // Da tra tre 2 ngay
                 },
                 new BorrowRecord
                 {
-                    BookId = savedBooks[2].Id, // Sách 3 (Textbook)
-                    BorrowerName = "Nguyễn Hoàng Nam",
+                    BookId = savedBooks[2].Id, // Sach 3 (Textbook)
+                    BorrowerName = "Nguyen Hoang Nam",
                     BorrowDate = now.AddDays(-7),
                     DueDate = now.AddDays(7),
-                    ReturnedDate = null, // Còn hạn
+                    ReturnedDate = null, // Con han
                     LateFee = 0m
                 },
                 new BorrowRecord
                 {
-                    BookId = savedBooks[3].Id, // Sách 4
-                    BorrowerName = "Trần Bảo Ngọc",
+                    BookId = savedBooks[3].Id, // Sach 4
+                    BorrowerName = "Tran Bao Ngoc",
                     BorrowDate = now.AddDays(-30),
                     DueDate = now.AddDays(-16),
-                    ReturnedDate = null, // Quá hạn 16 ngày
+                    ReturnedDate = null, // Qua han 16 ngay
                     LateFee = null
                 }
             };
 
-            // Cập nhật đồng bộ trạng thái IsBorrowed = true cho các sách đang được mượn (chưa trả)
+            // Cap nhat dong bo trang thai IsBorrowed = true cho cac sach dang duoc muon (chua tra)
             savedBooks[0].IsBorrowed = true;
             savedBooks[2].IsBorrowed = true;
             savedBooks[3].IsBorrowed = true;
@@ -96,7 +96,7 @@ public static class DbInitializer
             await context.SaveChangesAsync();
         }
 
-        Console.WriteLine($"[DbInitializer] Đã nạp thành công {realBooks.Count} cuốn sách THẬT vào Database!");
+        Console.WriteLine($"[DbInitializer] Da nap thanh cong {realBooks.Count} cuon sach THAT vao Database!");
     }
 
     private static async Task<List<Book>> FetchBooksFromOpenLibraryApiAsync(HttpClient httpClient)
@@ -131,7 +131,7 @@ public static class DbInitializer
                     var title = docItem.TryGetProperty("title", out var t) ? t.GetString() : null;
                     if (string.IsNullOrWhiteSpace(title)) continue;
 
-                    var authorsStr = "Nhiều tác giả";
+                    var authorsStr = "Nhieu tac gia";
                     if (docItem.TryGetProperty("author_name", out var authorsArr) && authorsArr.ValueKind == JsonValueKind.Array)
                     {
                         var authors = authorsArr.EnumerateArray().Select(a => a.GetString()).Where(a => !string.IsNullOrEmpty(a));
@@ -162,11 +162,11 @@ public static class DbInitializer
 
                     var bookType = defaultType;
                     var titleLower = title.ToLower();
-                    if (titleLower.Contains("journal") || titleLower.Contains("magazine") || titleLower.Contains("tạp chí"))
+                    if (titleLower.Contains("journal") || titleLower.Contains("magazine") || titleLower.Contains("tap chi"))
                     {
                         bookType = BookType.Magazine;
                     }
-                    else if (titleLower.Contains("edition") || titleLower.Contains("handbook") || titleLower.Contains("guide") || titleLower.Contains("giáo trình") || titleLower.Contains("programming"))
+                    else if (titleLower.Contains("edition") || titleLower.Contains("handbook") || titleLower.Contains("guide") || titleLower.Contains("giao trinh") || titleLower.Contains("programming"))
                     {
                         bookType = BookType.Textbook;
                     }
@@ -187,7 +187,7 @@ public static class DbInitializer
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DbInitializer] Lỗi khi gửi OpenLibrary API ({query}): {ex.Message}");
+                Console.WriteLine($"[DbInitializer] Loi khi gui OpenLibrary API ({query}): {ex.Message}");
             }
         }
 

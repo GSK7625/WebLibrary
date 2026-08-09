@@ -1,6 +1,13 @@
 @Library.API_HostAddress = http://localhost:5113
 
-GET {{Library.API_HostAddress}}/weatherforecast/
+### Lấy danh sách sách
+GET {{Library.API_HostAddress}}/api/books
 Accept: application/json
 
-###
+### Tính thử phí phạt sách trễ hạn (OCP Strategy)
+GET {{Library.API_HostAddress}}/api/books/1/fee-preview?daysLate=5
+Accept: application/json
+
+### Lấy danh sách phiếu mượn
+GET {{Library.API_HostAddress}}/api/borrow
+Accept: application/json

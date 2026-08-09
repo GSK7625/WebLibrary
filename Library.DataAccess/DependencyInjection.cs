@@ -1,4 +1,4 @@
-using Library.DataAccess.Interfaces;
+using Library.Business.Interfaces;
 using Library.DataAccess.Persistence;
 using Library.DataAccess.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;

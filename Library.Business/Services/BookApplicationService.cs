@@ -1,8 +1,7 @@
 using Library.Business.DTOs;
 using Library.Business.Legacy;
-using Library.Business.Services.Interfaces;
-using Library.DataAccess.Interfaces;
-using Library.Domain.Entities;
+using Library.Business.Interfaces;
+using Library.Business.Entities;
 
 namespace Library.Business.Services;
 
@@ -41,7 +40,7 @@ public class BookApplicationService : IBookApplicationService
         var book = await _bookRepository.GetByIdAsync(bookId);
         if (book is null)
         {
-            throw new KeyNotFoundException($"Không tìm thấy sách có Id = {bookId}");
+            throw new KeyNotFoundException($"Khong tim thay sach co Id = {bookId}");
         }
 
         var fee = _lateFeeService.CalculateFee(book.Type, daysLate);
@@ -53,8 +52,8 @@ public class BookApplicationService : IBookApplicationService
             BookType = book.Type.ToString(),
             DaysLate = daysLate,
             Fee = fee,
-            Method = "Strategy Pattern + DI (Tuân thủ OCP)",
-            Note = "Dễ dàng thêm loại sách mới mà KHÔNG SỬA code tính phí hiện tại!"
+            Method = "Strategy Pattern + DI (Tuan thu OCP)",
+            Note = "De dang them loai sach moi ma KHONG SUA code tinh phi hien tai!"
         };
     }
 
@@ -63,7 +62,7 @@ public class BookApplicationService : IBookApplicationService
         var book = await _bookRepository.GetByIdAsync(bookId);
         if (book is null)
         {
-            throw new KeyNotFoundException($"Không tìm thấy sách có Id = {bookId}");
+            throw new KeyNotFoundException($"Khong tim thay sach co Id = {bookId}");
         }
 
         var fee = _legacyFeeCalculator.CalculateLateFee(book, daysLate);
@@ -75,8 +74,8 @@ public class BookApplicationService : IBookApplicationService
             BookType = book.Type.ToString(),
             DaysLate = daysLate,
             Fee = fee,
-            Method = "Switch-Case Legacy (Vi phạm OCP)",
-            Note = "Muốn thêm loại sách mới buộc phải SỬA CODE switch-case trong LegacyFeeCalculator!"
+            Method = "Switch-Case Legacy (Vi pham OCP)",
+            Note = "Muon them loai sach moi buoc phai SUA CODE switch-case trong LegacyFeeCalculator!"
         };
     }
 }

@@ -4,15 +4,15 @@ namespace Library.Business.DTOs;
 
 public class BorrowRequestDto
 {
-    [Required(ErrorMessage = "Id c?a sách không du?c d? tr?ng")]
-    [Range(1, int.MaxValue, ErrorMessage = "Id c?a sách ph?i l?n hon 0")]
+    [Required(ErrorMessage = "Id cua sach khong duoc de trong")]
+    [Range(1, int.MaxValue, ErrorMessage = "Id cua sach phai lon hon 0")]
     public int BookId { get; set; }
 
-    [Required(ErrorMessage = "Tên ngu?i mu?n không du?c d? tr?ng")]
-    [StringLength(100, MinimumLength = 2, ErrorMessage = "Tên ngu?i mu?n ph?i t? 2 d?n 100 ký t?")]
+    [Required(ErrorMessage = "Ten nguoi muon khong duoc de trong")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "Ten nguoi muon phai tu 2 den 100 ky tu")]
     public string BorrowerName { get; set; } = string.Empty;
 
-    [Range(1, 365, ErrorMessage = "S? ngày mu?n ph?i n?m trong kho?ng t? 1 d?n 365 ngày")]
+    [Range(1, 365, ErrorMessage = "So ngay muon phai nam trong khoang tu 1 den 365 ngay")]
     public int BorrowDays { get; set; } = 7;
 }
 
@@ -57,4 +57,3 @@ public class FeePreviewDto
     public string Method { get; set; } = string.Empty;
     public string Note { get; set; } = string.Empty;
 }
-

@@ -1,4 +1,4 @@
-using Library.Domain.Enums;
+using Library.Business.Enums;
 
 namespace Library.Business.DTOs;
 

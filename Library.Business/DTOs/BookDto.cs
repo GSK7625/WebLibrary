@@ -10,6 +10,6 @@ public class BookDto
     public string ISBN { get; set; } = string.Empty;
     public BookType Type { get; set; }
     public string TypeName => Type.ToString();
+    public decimal BasePrice { get; set; }
     public bool IsBorrowed { get; set; }
 }
-

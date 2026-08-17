@@ -12,21 +12,44 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddBusinessServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // Register OCP Strategies via Dependency Injection
-        services.AddScoped<ILateFeeStrategy, RegularBookFeeStrategy>();
+        // Register Advanced OCP Strategies via Dependency Injection
+        // ĐIỂM SÁNG OCP: Khi thêm chiến lược mới, chỉ cần tạo file mới và thêm 1 dòng AddScoped bên dưới!
+        // Không hề chạm hay làm thay đổi LateFeeApplicationService!
+        services.AddScoped<ILateFeeStrategy, StaffExemptionFeeStrategy>();
+        services.AddScoped<ILateFeeStrategy, VIPMemberFeeStrategy>();
+        services.AddScoped<ILateFeeStrategy, StudentTextbookFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, RareBookFeeStrategy>();
-        services.AddScoped<ILateFeeStrategy, TextbookFeeStrategy>();
-        services.AddScoped<ILateFeeStrategy, MagazineFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, ForeignBookFeeStrategy>();
+        services.AddScoped<ILateFeeStrategy, MagazineFeeStrategy>();
+        services.AddScoped<ILateFeeStrategy, TextbookFeeStrategy>();
+        services.AddScoped<ILateFeeStrategy, RegularBookFeeStrategy>();
 
-        // Register Legacy Calculator (phuc vu doi chieu demo OCP & SRP)
+        // Register Legacy Demos (phục vụ đối chiếu demo SOLID)
         services.AddSingleton<LegacyFeeCalculator>();
         services.AddScoped<BadBorrowManager>();
+        services.AddScoped<LspViolationProcessor>();
+        services.AddScoped<BadGuestKioskClient>();
+        services.AddScoped<BadBorrowNotificationManager>();
 
-        // Register Application Services voi Interfaces tuong ung
+        // Register Application Services với Interfaces tương ứng (SRP & OCP)
         services.AddScoped<ILateFeeApplicationService, LateFeeApplicationService>();
         services.AddScoped<IBookApplicationService, BookApplicationService>();
         services.AddScoped<IBorrowApplicationService, BorrowApplicationService>();
+
+        // Register LSP Services
+        services.AddScoped<Library.Business.Lsp.LspCleanBorrowProcessor>();
+
+        // Register ISP Services
+        services.AddScoped<Library.Business.Isp.IBookSearchService, Library.Business.Isp.CleanGuestKioskService>();
+        services.AddScoped<Library.Business.Isp.CleanSelfCheckoutStation>();
+        services.AddScoped<Library.Business.Isp.CleanLibrarianInventoryService>();
+
+        // Register DIP Services (Abstractions & Concrete Implementations)
+        services.AddSingleton<Library.Business.Dip.IAuditLogger, Library.Business.Dip.InMemoryAuditLogger>();
+        services.AddScoped<Library.Business.Dip.INotificationSender, Library.Business.Dip.EmailNotificationSender>();
+        services.AddScoped<Library.Business.Dip.INotificationSender, Library.Business.Dip.SmsNotificationSender>();
+        services.AddScoped<Library.Business.Dip.INotificationSender, Library.Business.Dip.ZaloNotificationSender>();
+        services.AddScoped<Library.Business.Dip.IBorrowNotificationService, Library.Business.Dip.BorrowNotificationApplicationService>();
 
         return services;
     }
@@ -45,7 +68,7 @@ public static class DependencyInjection
             {
                 var loggerFactory = sp.GetService<ILoggerFactory>();
                 var logger = loggerFactory?.CreateLogger("DatabaseInitializer");
-                logger?.LogError(ex, "Loi xay ra khi khoi tao du lieu Database!");
+                logger?.LogError(ex, "Lỗi xảy ra khi khởi tạo dữ liệu Database!");
             }
         }
         return services;

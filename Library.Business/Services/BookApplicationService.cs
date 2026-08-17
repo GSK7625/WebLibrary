@@ -1,7 +1,8 @@
 using Library.Business.DTOs;
+using Library.Business.Enums;
 using Library.Business.Legacy;
 using Library.Business.Interfaces;
-using Library.Business.Entities;
+using Library.Business.Models;
 
 namespace Library.Business.Services;
 
@@ -31,51 +32,64 @@ public class BookApplicationService : IBookApplicationService
             Author = b.Author,
             ISBN = b.ISBN,
             Type = b.Type,
+            BasePrice = b.BasePrice,
             IsBorrowed = b.IsBorrowed
         });
     }
 
-    public async Task<FeePreviewDto> PreviewFeeAsync(int bookId, int daysLate)
+    public async Task<FeePreviewDto> PreviewFeeAsync(int bookId, int daysLate, MemberType memberType = MemberType.Standard)
     {
         var book = await _bookRepository.GetByIdAsync(bookId);
         if (book is null)
         {
-            throw new KeyNotFoundException($"Khong tim thay sach co Id = {bookId}");
+            throw new KeyNotFoundException($"Không tìm thấy sách có Id = {bookId}");
         }
 
-        var fee = _lateFeeService.CalculateFee(book.Type, daysLate);
+        var result = _lateFeeService.CalculateFee(book, daysLate, memberType);
 
         return new FeePreviewDto
         {
             BookId = book.Id,
             BookTitle = book.Title,
             BookType = book.Type.ToString(),
+            BasePrice = book.BasePrice,
+            MemberType = memberType,
             DaysLate = daysLate,
-            Fee = fee,
-            Method = "Strategy Pattern + DI (Tuan thu OCP)",
-            Note = "De dang them loai sach moi ma KHONG SUA code tinh phi hien tai!"
+            BaseFee = result.BaseFee,
+            DiscountAmount = result.DiscountAmount,
+            FinalFee = result.FinalFee,
+            StrategyName = result.StrategyName,
+            AppliedRules = result.AppliedRules,
+            Method = "Advanced Strategy Pattern + Dynamic Predicate (Tuân thủ OCP)",
+            Note = "Dễ dàng thêm chính sách mới (VD: Giảm giá sinh viên, ân hạn VIP, phạt lũy tiến) bằng cách tạo class Strategy mới mà KHÔNG CẦN SỬA BẤT KỲ DÒNG CODE CŨ NÀO!"
         };
     }
 
-    public async Task<FeePreviewDto> PreviewLegacyFeeAsync(int bookId, int daysLate)
+    public async Task<FeePreviewDto> PreviewLegacyFeeAsync(int bookId, int daysLate, MemberType memberType = MemberType.Standard)
     {
         var book = await _bookRepository.GetByIdAsync(bookId);
         if (book is null)
         {
-            throw new KeyNotFoundException($"Khong tim thay sach co Id = {bookId}");
+            throw new KeyNotFoundException($"Không tìm thấy sách có Id = {bookId}");
         }
 
-        var fee = _legacyFeeCalculator.CalculateLateFee(book, daysLate);
+        var result = _legacyFeeCalculator.CalculateLateFeeLegacy(book, daysLate, memberType);
 
         return new FeePreviewDto
         {
             BookId = book.Id,
             BookTitle = book.Title,
             BookType = book.Type.ToString(),
+            BasePrice = book.BasePrice,
+            MemberType = memberType,
             DaysLate = daysLate,
-            Fee = fee,
-            Method = "Switch-Case Legacy (Vi pham OCP)",
-            Note = "Muon them loai sach moi buoc phai SUA CODE switch-case trong LegacyFeeCalculator!"
+            BaseFee = result.BaseFee,
+            DiscountAmount = result.DiscountAmount,
+            FinalFee = result.FinalFee,
+            StrategyName = result.StrategyName,
+            AppliedRules = result.AppliedRules,
+            Method = "Monolithic Switch-Case & If-Else (Vi phạm OCP)",
+            Note = "Muốn thêm chính sách mới BẮT BUỘC PHẢI SỬA CODE CŨ trong LegacyFeeCalculator, dễ gây bug vỡ hệ thống!"
         };
     }
 }

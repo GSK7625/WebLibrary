@@ -46,7 +46,7 @@ public class BorrowController : ControllerBase
     [HttpPost("{id}/return")]
     public async Task<ActionResult<ReturnBookResponseDto>> ReturnBook(int id, [FromBody] ReturnBookRequestDto? request)
     {
-        var result = await _borrowService.ReturnBookByBorrowRecordIdAsync(id, request?.ReturnedDate);
+        var result = await _borrowService.ReturnBookByBorrowRecordIdAsync(id, request);
         return Ok(result);
     }
 

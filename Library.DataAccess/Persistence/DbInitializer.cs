@@ -9,16 +9,14 @@ public static class DbInitializer
 {
     public static async Task SeedDataAsync(LibraryDbContext context, HttpClient? httpClient = null, bool forceRecreate = false)
     {
-        // Ensure database exists without deleting file on startup to prevent file locks
         await context.Database.EnsureCreatedAsync();
 
         if (forceRecreate)
         {
-            // Clear existing records cleanly without dropping SQLite DB file
             context.BorrowRecords.RemoveRange(context.BorrowRecords);
             context.Books.RemoveRange(context.Books);
             await context.SaveChangesAsync();
-            Console.WriteLine("[DbInitializer] Da xoa toan bo du lieu cu thanh cong!");
+            Console.WriteLine("[DbInitializer] Đã xóa toàn bộ dữ liệu cũ thành công!");
         }
         else if (await context.Books.AnyAsync())
         {
@@ -39,10 +37,15 @@ public static class DbInitializer
             }
         }
 
+        if (realBooks.Count == 0)
+        {
+            // Seed dữ liệu mẫu đa dạng nếu không fetch được từ API ngoài
+            realBooks = GetFallbackSampleBooks();
+        }
+
         await context.Books.AddRangeAsync(realBooks);
         await context.SaveChangesAsync();
 
-        // Seed lich su muon tra thuc te voi cac ma sach that vua nap
         var savedBooks = await context.Books.ToListAsync();
         if (savedBooks.Count >= 5)
         {
@@ -51,43 +54,42 @@ public static class DbInitializer
             {
                 new BorrowRecord
                 {
-                    BookId = savedBooks[0].Id, // Sach 1
-                    BorrowerName = "Le Van Hung",
+                    BookId = savedBooks[0].Id,
+                    BorrowerName = "Lê Văn Hùng (Sinh viên)",
                     BorrowDate = now.AddDays(-15),
                     DueDate = now.AddDays(-5),
-                    ReturnedDate = null, // Qua han 5 ngay
+                    ReturnedDate = null, // Quá hạn 10 ngày
                     LateFee = null
                 },
                 new BorrowRecord
                 {
-                    BookId = savedBooks[1].Id, // Sach 2 (Foreign / Rare)
-                    BorrowerName = "Pham Thi Minh",
+                    BookId = savedBooks[1].Id,
+                    BorrowerName = "Phạm Thị Minh (Độc giả VIP)",
                     BorrowDate = now.AddDays(-20),
                     DueDate = now.AddDays(-10),
                     ReturnedDate = now.AddDays(-8),
-                    LateFee = 10000m // Da tra tre 2 ngay
+                    LateFee = 14000m
                 },
                 new BorrowRecord
                 {
-                    BookId = savedBooks[2].Id, // Sach 3 (Textbook)
-                    BorrowerName = "Nguyen Hoang Nam",
+                    BookId = savedBooks[2].Id,
+                    BorrowerName = "Nguyễn Hoàng Nam (Cán bộ Staff)",
                     BorrowDate = now.AddDays(-7),
                     DueDate = now.AddDays(7),
-                    ReturnedDate = null, // Con han
+                    ReturnedDate = null,
                     LateFee = 0m
                 },
                 new BorrowRecord
                 {
-                    BookId = savedBooks[3].Id, // Sach 4
-                    BorrowerName = "Tran Bao Ngoc",
+                    BookId = savedBooks[3].Id,
+                    BorrowerName = "Trần Bảo Ngọc (Thường)",
                     BorrowDate = now.AddDays(-30),
                     DueDate = now.AddDays(-16),
-                    ReturnedDate = null, // Qua han 16 ngay
+                    ReturnedDate = null, // Quá hạn 16 ngày (Sách hiếm / Ngoại văn)
                     LateFee = null
                 }
             };
 
-            // Cap nhat dong bo trang thai IsBorrowed = true cho cac sach dang duoc muon (chua tra)
             savedBooks[0].IsBorrowed = true;
             savedBooks[2].IsBorrowed = true;
             savedBooks[3].IsBorrowed = true;
@@ -96,7 +98,20 @@ public static class DbInitializer
             await context.SaveChangesAsync();
         }
 
-        Console.WriteLine($"[DbInitializer] Da nap thanh cong {realBooks.Count} cuon sach THAT vao Database!");
+        Console.WriteLine($"[DbInitializer] Đã nạp thành công {realBooks.Count} cuốn sách vào Database!");
+    }
+
+    private static List<Book> GetFallbackSampleBooks()
+    {
+        return new List<Book>
+        {
+            new Book { Title = "Giáo Trình C# .NET Enterprise Core", Author = "Microsoft Press", ISBN = "978-0134685991", Type = BookType.Textbook, BasePrice = 150000m },
+            new Book { Title = "Đại Việt Sử Ký Toàn Thư (Bản Cổ Khắc Gỗ 1697)", Author = "Ngô Sĩ Liên", ISBN = "978-6045501234", Type = BookType.Rare, BasePrice = 500000m },
+            new Book { Title = "Clean Architecture: A Craftsman's Guide", Author = "Robert C. Martin", ISBN = "978-0134494166", Type = BookType.Foreign, BasePrice = 320000m },
+            new Book { Title = "Tạp Chí Khoa Học Thư Viện & CNTT Số 45", Author = "Hội Thư Viện VN", ISBN = "978-6047719999", Type = BookType.Magazine, BasePrice = 50000m },
+            new Book { Title = "Audiobook: Lược Sử Loài Người Sapiens", Author = "Yuval Noah Harari", ISBN = "978-6045618888", Type = BookType.Audio, BasePrice = 180000m },
+            new Book { Title = "Lập Trình Hướng Đối Tượng & SOLID Principles", Author = "Nguyễn Văn A", ISBN = "978-6045509999", Type = BookType.Regular, BasePrice = 100000m }
+        };
     }
 
     private static async Task<List<Book>> FetchBooksFromOpenLibraryApiAsync(HttpClient httpClient)
@@ -107,8 +122,7 @@ public static class DbInitializer
             ("csharp programming", BookType.Textbook),
             ("clean code", BookType.Foreign),
             ("design patterns", BookType.Foreign),
-            ("computer science", BookType.Textbook),
-            ("software engineering", BookType.Textbook)
+            ("computer science", BookType.Textbook)
         };
 
         var seenIsbns = new HashSet<string>();
@@ -117,7 +131,7 @@ public static class DbInitializer
         {
             try
             {
-                var url = $"https://openlibrary.org/search.json?q={Uri.EscapeDataString(query)}&limit=10";
+                var url = $"https://openlibrary.org/search.json?q={Uri.EscapeDataString(query)}&limit=5";
                 var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode) continue;
 
@@ -131,7 +145,7 @@ public static class DbInitializer
                     var title = docItem.TryGetProperty("title", out var t) ? t.GetString() : null;
                     if (string.IsNullOrWhiteSpace(title)) continue;
 
-                    var authorsStr = "Nhieu tac gia";
+                    var authorsStr = "Nhái tác giả";
                     if (docItem.TryGetProperty("author_name", out var authorsArr) && authorsArr.ValueKind == JsonValueKind.Array)
                     {
                         var authors = authorsArr.EnumerateArray().Select(a => a.GetString()).Where(a => !string.IsNullOrEmpty(a));
@@ -162,18 +176,23 @@ public static class DbInitializer
 
                     var bookType = defaultType;
                     var titleLower = title.ToLower();
-                    if (titleLower.Contains("journal") || titleLower.Contains("magazine") || titleLower.Contains("tap chi"))
+                    if (titleLower.Contains("journal") || titleLower.Contains("magazine"))
                     {
                         bookType = BookType.Magazine;
                     }
-                    else if (titleLower.Contains("edition") || titleLower.Contains("handbook") || titleLower.Contains("guide") || titleLower.Contains("giao trinh") || titleLower.Contains("programming"))
+                    else if (titleLower.Contains("edition") || titleLower.Contains("handbook") || titleLower.Contains("guide"))
                     {
                         bookType = BookType.Textbook;
                     }
-                    else if (!IsVietnameseText(title) && defaultType == BookType.Regular)
+
+                    decimal basePrice = bookType switch
                     {
-                        bookType = BookType.Foreign;
-                    }
+                        BookType.Rare => 500000m,
+                        BookType.Foreign => 280000m,
+                        BookType.Textbook => 150000m,
+                        BookType.Magazine => 50000m,
+                        _ => 100000m
+                    };
 
                     books.Add(new Book
                     {
@@ -181,22 +200,22 @@ public static class DbInitializer
                         Author = authorsStr.Length > 100 ? authorsStr.Substring(0, 97) + "..." : authorsStr,
                         ISBN = isbn,
                         Type = bookType,
+                        BasePrice = basePrice,
                         IsBorrowed = false
                     });
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DbInitializer] Loi khi gui OpenLibrary API ({query}): {ex.Message}");
+                Console.WriteLine($"[DbInitializer] Lỗi khi gửi OpenLibrary API ({query}): {ex.Message}");
             }
         }
 
-        return books;
-    }
+        if (books.Count == 0)
+        {
+            books = GetFallbackSampleBooks();
+        }
 
-    private static bool IsVietnameseText(string input)
-    {
-        string vietnameseChars = "àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ";
-        return input.ToLower().Any(c => vietnameseChars.Contains(c));
+        return books;
     }
 }

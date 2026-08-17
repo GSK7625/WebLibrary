@@ -6,5 +6,5 @@ public interface IBorrowApplicationService
 {
     Task<IEnumerable<BorrowRecordDto>> GetAllBorrowRecordsAsync();
     Task<BorrowRecordDto> BorrowBookAsync(BorrowRequestDto request);
-    Task<ReturnBookResponseDto> ReturnBookByBorrowRecordIdAsync(int borrowRecordId, DateTime? actualReturnedDate = null);
+    Task<ReturnBookResponseDto> ReturnBookByBorrowRecordIdAsync(int borrowRecordId, ReturnBookRequestDto? request = null);
 }

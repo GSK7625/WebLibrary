@@ -9,5 +9,6 @@ public class Book
     public string Author { get; set; } = string.Empty;
     public string ISBN { get; set; } = string.Empty;
     public BookType Type { get; set; }
+    public decimal BasePrice { get; set; } = 100000m;
     public bool IsBorrowed { get; set; }
 }

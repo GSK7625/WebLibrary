@@ -87,7 +87,7 @@ public class BorrowApplicationService : IBorrowApplicationService
         };
     }
 
-    public async Task<ReturnBookResponseDto> ReturnBookByBorrowRecordIdAsync(int borrowRecordId, DateTime? actualReturnedDate = null)
+    public async Task<ReturnBookResponseDto> ReturnBookByBorrowRecordIdAsync(int borrowRecordId, ReturnBookRequestDto? request = null)
     {
         var record = await _borrowRepository.GetByIdAsync(borrowRecordId);
         if (record is null)
@@ -100,7 +100,7 @@ public class BorrowApplicationService : IBorrowApplicationService
             throw new InvalidOperationException($"Phieu muon Id = {borrowRecordId} da duoc tra truoc do vao ngay {record.ReturnedDate.Value:dd/MM/yyyy HH:mm}.");
         }
 
-        var returnedDate = actualReturnedDate ?? DateTime.Now;
+        var returnedDate = request?.ReturnedDate ?? DateTime.Now;
         if (returnedDate < record.BorrowDate)
         {
             throw new ArgumentException("Ngay tra sach khong duoc nho hon ngay muon sach.");
@@ -119,11 +119,13 @@ public class BorrowApplicationService : IBorrowApplicationService
             daysLate = (int)Math.Ceiling((returnedDate - record.DueDate).TotalDays);
         }
 
+        var memberType = request?.MemberType ?? Enums.MemberType.Standard;
+
         // Tinh phi bang LateFeeApplicationService (Strategy Pattern OCP)
-        decimal lateFee = _lateFeeService.CalculateFee(book.Type, daysLate);
+        var feeResult = _lateFeeService.CalculateFee(book, daysLate, memberType);
 
         record.ReturnedDate = returnedDate;
-        record.LateFee = lateFee;
+        record.LateFee = feeResult.FinalFee;
         book.IsBorrowed = false;
 
         await _borrowRepository.UpdateAsync(record);
@@ -137,10 +139,13 @@ public class BorrowApplicationService : IBorrowApplicationService
             DueDate = record.DueDate,
             ReturnedDate = returnedDate,
             DaysLate = daysLate,
-            LateFee = lateFee,
-            FeeCalculationMethod = "Strategy Pattern (OCP)",
+            BaseFee = feeResult.BaseFee,
+            DiscountAmount = feeResult.DiscountAmount,
+            LateFee = feeResult.FinalFee,
+            FeeCalculationMethod = $"Strategy Pattern - {feeResult.StrategyName} (OCP)",
+            AppliedRules = feeResult.AppliedRules,
             Message = daysLate > 0
-                ? $"Tra sach tre {daysLate} ngay. Phi tra han la {lateFee:N0} VND ({book.Type})"
+                ? $"Tra sach tre {daysLate} ngay. Phi tra han la {feeResult.FinalFee:N0} VND ({book.Type})"
                 : "Tra sach dung han. Khong phat sinh phi tra han."
         };
     }

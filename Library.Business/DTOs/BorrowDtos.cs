@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Library.Business.Enums;
 
 namespace Library.Business.DTOs;
 
@@ -14,6 +15,8 @@ public class BorrowRequestDto
 
     [Range(1, 365, ErrorMessage = "So ngay muon phai nam trong khoang tu 1 den 365 ngay")]
     public int BorrowDays { get; set; } = 7;
+
+    public MemberType MemberType { get; set; } = MemberType.Standard;
 }
 
 public class BorrowRecordDto
@@ -31,6 +34,7 @@ public class BorrowRecordDto
 public class ReturnBookRequestDto
 {
     public DateTime? ReturnedDate { get; set; }
+    public MemberType MemberType { get; set; } = MemberType.Standard;
 }
 
 public class ReturnBookResponseDto
@@ -42,8 +46,11 @@ public class ReturnBookResponseDto
     public DateTime DueDate { get; set; }
     public DateTime ReturnedDate { get; set; }
     public int DaysLate { get; set; }
+    public decimal BaseFee { get; set; }
+    public decimal DiscountAmount { get; set; }
     public decimal LateFee { get; set; }
     public string FeeCalculationMethod { get; set; } = string.Empty;
+    public List<string> AppliedRules { get; set; } = new();
     public string Message { get; set; } = string.Empty;
 }
 
@@ -52,8 +59,15 @@ public class FeePreviewDto
     public int BookId { get; set; }
     public string BookTitle { get; set; } = string.Empty;
     public string BookType { get; set; } = string.Empty;
+    public decimal BasePrice { get; set; }
+    public MemberType MemberType { get; set; }
+    public string MemberTypeName => MemberType.ToString();
     public int DaysLate { get; set; }
-    public decimal Fee { get; set; }
+    public decimal BaseFee { get; set; }
+    public decimal DiscountAmount { get; set; }
+    public decimal FinalFee { get; set; }
+    public string StrategyName { get; set; } = string.Empty;
+    public List<string> AppliedRules { get; set; } = new();
     public string Method { get; set; } = string.Empty;
     public string Note { get; set; } = string.Empty;
 }

@@ -1,13 +1,75 @@
 @Library.API_HostAddress = http://localhost:5113
 
-### Lấy danh sách sách
-GET {{Library.API_HostAddress}}/api/books
-Accept: application/json
+### ====================================================
+### 1. S - SINGLE RESPONSIBILITY PRINCIPLE (SRP)
+### ====================================================
 
-### Tính thử phí phạt sách trễ hạn (OCP Strategy)
-GET {{Library.API_HostAddress}}/api/books/1/fee-preview?daysLate=5
-Accept: application/json
-
-### Lấy danh sách phiếu mượn
+### Lấy danh sách phiếu mượn (Chuẩn SRP - Repository tách biệt)
 GET {{Library.API_HostAddress}}/api/borrow
+Accept: application/json
+
+### Trả sách chuẩn SRP (Tách biệt Application Service, Repository & Fee Strategy)
+POST {{Library.API_HostAddress}}/api/borrow/1/return
+Content-Type: application/json
+
+{
+  "memberType": 1
+}
+
+### Trả sách vi phạm SRP (BadBorrowManager ôm đồm 5 trách nhiệm)
+POST {{Library.API_HostAddress}}/api/borrow/1/return-srp-violation
+Content-Type: application/json
+
+{}
+
+
+### ====================================================
+### 2. O - OPEN-CLOSED PRINCIPLE (OCP)
+### ====================================================
+
+### Tính phí trả hạn theo OCP Strategy Pattern (Dễ mở rộng mà không sửa code cũ)
+GET {{Library.API_HostAddress}}/api/books/1/fee-preview?daysLate=5&memberType=3
+Accept: application/json
+
+### Tính phí trả hạn theo Legacy vi phạm OCP (Switch-case khổng lồ, khó mở rộng)
+GET {{Library.API_HostAddress}}/api/books/1/legacy-fee-preview?daysLate=5&memberType=3
+Accept: application/json
+
+
+### ====================================================
+### 3. L - LISKOV SUBSTITUTION PRINCIPLE (LSP)
+### ====================================================
+
+### Demo Vi phạm LSP (Lớp con ném Exception làm sập chu trình mượn đa hình)
+GET {{Library.API_HostAddress}}/api/soliddemo/lsp/violation-demo
+Accept: application/json
+
+### Demo Chuẩn LSP (Lớp con thay thế hoàn hảo cho lớp cha/interface)
+GET {{Library.API_HostAddress}}/api/soliddemo/lsp/clean-demo
+Accept: application/json
+
+
+### ====================================================
+### 4. I - INTERFACE SEGREGATION PRINCIPLE (ISP)
+### ====================================================
+
+### Demo Vi phạm ISP (Fat Interface ép Kiosk công cộng implement các hàm quản trị)
+GET {{Library.API_HostAddress}}/api/soliddemo/isp/violation-demo
+Accept: application/json
+
+### Demo Chuẩn ISP (Phân tách thành các Role-based Interfaces chuyên biệt)
+GET {{Library.API_HostAddress}}/api/soliddemo/isp/clean-demo
+Accept: application/json
+
+
+### ====================================================
+### 5. D - DEPENDENCY INVERSION PRINCIPLE (DIP)
+### ====================================================
+
+### Demo Vi phạm DIP (Lớp nghiệp vụ 'new' trực tiếp hạ tầng SMS/SMTP/File)
+GET {{Library.API_HostAddress}}/api/soliddemo/dip/violation-demo
+Accept: application/json
+
+### Demo Chuẩn DIP (Điều phối thông báo qua Abstraction INotificationSender & IAuditLogger)
+POST {{Library.API_HostAddress}}/api/soliddemo/dip/clean-notify?borrowerName=PhamThiMinh&contactInfo=minh@example.com&bookTitle=CleanCode&daysLate=5
 Accept: application/json

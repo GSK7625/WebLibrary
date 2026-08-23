@@ -1,7 +1,7 @@
-namespace Library.Business.Enums;
+namespace Library.DataAccess.Enums;
 
 /// <summary>
-/// Loai hoi vien thu vien
+/// Loại hội viên thư viện
 /// </summary>
 public enum MemberType
 {

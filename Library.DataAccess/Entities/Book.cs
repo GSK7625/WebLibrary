@@ -1,6 +1,6 @@
-using Library.Business.Enums;
+using Library.DataAccess.Enums;
 
-namespace Library.Business.Entities;
+namespace Library.DataAccess.Entities;
 
 public class Book
 {

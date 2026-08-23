@@ -1,4 +1,4 @@
-namespace Library.Business.Interfaces;
+namespace Library.DataAccess.Interfaces;
 
 public interface IDatabaseInitializer
 {

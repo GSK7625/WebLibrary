@@ -1,11 +1,12 @@
-using Library.Business.Enums;
 using Library.Business.Models;
+using Library.DataAccess.Enums;
 
 namespace Library.Business.Strategies;
 
 public class TextbookFeeStrategy : ILateFeeStrategy
 {
-    public int Priority => 30;
+    public string StrategyName => "Chính sách Giáo Trình (Độc giả thông thường)";
+    public int Priority => 40;
 
     public bool CanApply(FeeCalculationContext context)
     {
@@ -14,23 +15,21 @@ public class TextbookFeeStrategy : ILateFeeStrategy
 
     public FeeCalculationResult CalculateFee(FeeCalculationContext context)
     {
-        var result = new FeeCalculationResult
+        var rules = new List<string>();
+        decimal dailyRate = 4000m;
+        decimal baseFee = context.DaysLate * dailyRate;
+        rules.Add($"Phí giáo trình: {context.DaysLate} ngày x {dailyRate:N0} VND = {baseFee:N0} VND");
+
+        decimal finalFee = Math.Min(baseFee, context.Book.BasePrice);
+        rules.Add($"Tổng phí: {finalFee:N0} VND (Giới hạn tối đa bằng giá bìa: {context.Book.BasePrice:N0} VND)");
+
+        return new FeeCalculationResult
         {
-            StrategyName = nameof(TextbookFeeStrategy)
+            StrategyName = StrategyName,
+            BaseFee = baseFee,
+            DiscountAmount = 0m,
+            FinalFee = finalFee,
+            AppliedRules = rules
         };
-
-        if (context.DaysLate <= 0)
-        {
-            result.AppliedRules.Add("Trả đúng hạn: Phí = 0 VNĐ.");
-            return result;
-        }
-
-        decimal dailyRate = 3000m;
-        decimal total = context.DaysLate * dailyRate;
-        result.BaseFee = total;
-        result.FinalFee = total;
-        result.AppliedRules.Add($"Giáo trình học tập (Độc giả thông thường): {context.DaysLate} ngày x {dailyRate:N0} VNĐ/ngày = {total:N0} VNĐ.");
-
-        return result;
     }
 }

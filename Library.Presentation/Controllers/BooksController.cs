@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Library.Business.DTOs;
-using Library.Business.Enums;
 using Library.Business.Interfaces;
+using Library.DataAccess.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Presentation.Controllers;
@@ -28,12 +28,26 @@ public class BooksController : ControllerBase
     }
 
     /// <summary>
+    /// Lấy thông tin chi tiết một đầu sách theo Id
+    /// </summary>
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<BookDto>> GetBookById(int id)
+    {
+        var book = await _bookService.GetBookByIdAsync(id);
+        if (book is null)
+        {
+            return NotFound(new { message = $"Không tìm thấy sách có Id = {id}" });
+        }
+        return Ok(book);
+    }
+
+    /// <summary>
     /// Tính thử phí trả hạn nâng cao (Chuẩn OCP - Dynamic Predicate Strategy Pattern & Rule Auditing)
     /// </summary>
     /// <param name="id">Id của sách</param>
     /// <param name="daysLate">Số ngày trễ (0 - 365)</param>
     /// <param name="memberType">Loại độc giả: 1 (Standard), 2 (Student), 3 (VIP), 4 (Staff)</param>
-    [HttpGet("{id}/fee-preview")]
+    [HttpGet("{id:int}/fee-preview")]
     public async Task<ActionResult<FeePreviewDto>> PreviewFee(
         int id,
         [FromQuery, Range(0, 365, ErrorMessage = "Số ngày trễ phải từ 0 đến 365 ngày")] int daysLate,
@@ -49,7 +63,7 @@ public class BooksController : ControllerBase
     /// <param name="id">Id của sách</param>
     /// <param name="daysLate">Số ngày trễ (0 - 365)</param>
     /// <param name="memberType">Loại độc giả: 1 (Standard), 2 (Student), 3 (VIP), 4 (Staff)</param>
-    [HttpGet("{id}/legacy-fee-preview")]
+    [HttpGet("{id:int}/legacy-fee-preview")]
     public async Task<ActionResult<FeePreviewDto>> PreviewFeeLegacy(
         int id,
         [FromQuery, Range(0, 365, ErrorMessage = "Số ngày trễ phải từ 0 đến 365 ngày")] int daysLate,

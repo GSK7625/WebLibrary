@@ -1,4 +1,4 @@
-namespace Library.Business.Entities;
+namespace Library.DataAccess.Entities;
 
 public class BorrowRecord
 {

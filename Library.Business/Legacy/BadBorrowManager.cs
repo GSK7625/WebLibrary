@@ -1,6 +1,6 @@
-using Library.Business.Entities;
-using Library.Business.Enums;
-using Library.Business.Interfaces;
+using Library.DataAccess.Entities;
+using Library.DataAccess.Enums;
+using Library.DataAccess.Interfaces;
 
 namespace Library.Business.Legacy;
 

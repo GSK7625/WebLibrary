@@ -1,8 +1,10 @@
 using Library.Business.DTOs;
-using Library.Business.Enums;
-using Library.Business.Legacy;
 using Library.Business.Interfaces;
+using Library.Business.Legacy;
 using Library.Business.Models;
+using Library.DataAccess.Entities;
+using Library.DataAccess.Enums;
+using Library.DataAccess.Interfaces;
 
 namespace Library.Business.Services;
 
@@ -25,16 +27,13 @@ public class BookApplicationService : IBookApplicationService
     public async Task<IEnumerable<BookDto>> GetAllBooksAsync()
     {
         var books = await _bookRepository.GetAllAsync();
-        return books.Select(b => new BookDto
-        {
-            Id = b.Id,
-            Title = b.Title,
-            Author = b.Author,
-            ISBN = b.ISBN,
-            Type = b.Type,
-            BasePrice = b.BasePrice,
-            IsBorrowed = b.IsBorrowed
-        });
+        return books.Select(b => MapToDto(b));
+    }
+
+    public async Task<BookDto?> GetBookByIdAsync(int id)
+    {
+        var book = await _bookRepository.GetByIdAsync(id);
+        return book is null ? null : MapToDto(book);
     }
 
     public async Task<FeePreviewDto> PreviewFeeAsync(int bookId, int daysLate, MemberType memberType = MemberType.Standard)
@@ -61,7 +60,7 @@ public class BookApplicationService : IBookApplicationService
             StrategyName = result.StrategyName,
             AppliedRules = result.AppliedRules,
             Method = "Advanced Strategy Pattern + Dynamic Predicate (Tuân thủ OCP)",
-            Note = "Dễ dàng thêm chính sách mới (VD: Giảm giá sinh viên, ân hạn VIP, phạt lũy tiến) bằng cách tạo class Strategy mới mà KHÔNG CẦN SỬA BẤT KỲ DÒNG CODE CŨ NÀO!"
+            Note = "Dễ dàng thêm chính sách mới bằng cách tạo class Strategy mới mà KHÔNG CẦN SỬA CODE CŨ!"
         };
     }
 
@@ -89,7 +88,18 @@ public class BookApplicationService : IBookApplicationService
             StrategyName = result.StrategyName,
             AppliedRules = result.AppliedRules,
             Method = "Monolithic Switch-Case & If-Else (Vi phạm OCP)",
-            Note = "Muốn thêm chính sách mới BẮT BUỘC PHẢI SỬA CODE CŨ trong LegacyFeeCalculator, dễ gây bug vỡ hệ thống!"
+            Note = "Muốn thêm chính sách mới BẮT BUỘC PHẢI SỬA CODE CŨ trong LegacyFeeCalculator, dễ gây bug!"
         };
     }
+
+    private static BookDto MapToDto(Book b) => new()
+    {
+        Id = b.Id,
+        Title = b.Title,
+        Author = b.Author,
+        ISBN = b.ISBN,
+        Type = b.Type,
+        BasePrice = b.BasePrice,
+        IsBorrowed = b.IsBorrowed
+    };
 }

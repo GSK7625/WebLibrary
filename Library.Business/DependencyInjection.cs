@@ -2,6 +2,8 @@ using Library.Business.Interfaces;
 using Library.Business.Legacy;
 using Library.Business.Services;
 using Library.Business.Strategies;
+using Library.DataAccess;
+using Library.DataAccess.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,9 +14,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddBusinessServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // Đăng ký toàn bộ dịch vụ của tầng Data Access bên dưới (DAL)
+        services.AddDataAccessServices(configuration);
+
         // Register Advanced OCP Strategies via Dependency Injection
-        // ĐIỂM SÁNG OCP: Khi thêm chiến lược mới, chỉ cần tạo file mới và thêm 1 dòng AddScoped bên dưới!
-        // Không hề chạm hay làm thay đổi LateFeeApplicationService!
         services.AddScoped<ILateFeeStrategy, StaffExemptionFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, VIPMemberFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, StudentTextbookFeeStrategy>();

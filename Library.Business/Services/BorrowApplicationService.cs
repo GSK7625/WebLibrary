@@ -1,6 +1,8 @@
 using Library.Business.DTOs;
 using Library.Business.Interfaces;
-using Library.Business.Entities;
+using Library.DataAccess.Entities;
+using Library.DataAccess.Enums;
+using Library.DataAccess.Interfaces;
 
 namespace Library.Business.Services;
 
@@ -119,7 +121,7 @@ public class BorrowApplicationService : IBorrowApplicationService
             daysLate = (int)Math.Ceiling((returnedDate - record.DueDate).TotalDays);
         }
 
-        var memberType = request?.MemberType ?? Enums.MemberType.Standard;
+        var memberType = request?.MemberType ?? MemberType.Standard;
 
         // Tinh phi bang LateFeeApplicationService (Strategy Pattern OCP)
         var feeResult = _lateFeeService.CalculateFee(book, daysLate, memberType);

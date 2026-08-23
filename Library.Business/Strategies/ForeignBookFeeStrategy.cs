@@ -1,11 +1,12 @@
-using Library.Business.Enums;
 using Library.Business.Models;
+using Library.DataAccess.Enums;
 
 namespace Library.Business.Strategies;
 
 public class ForeignBookFeeStrategy : ILateFeeStrategy
 {
-    public int Priority => 50;
+    public string StrategyName => "Chính sách Sách Ngoại Văn (Foreign Book)";
+    public int Priority => 80;
 
     public bool CanApply(FeeCalculationContext context)
     {
@@ -14,27 +15,28 @@ public class ForeignBookFeeStrategy : ILateFeeStrategy
 
     public FeeCalculationResult CalculateFee(FeeCalculationContext context)
     {
-        var result = new FeeCalculationResult
-        {
-            StrategyName = nameof(ForeignBookFeeStrategy)
-        };
+        var rules = new List<string>();
+        decimal dailyRate = 7000m;
+        decimal baseFee = context.DaysLate * dailyRate;
+        rules.Add($"Phí cơ bản: {context.DaysLate} ngày x {dailyRate:N0} VND/ngày = {baseFee:N0} VND");
 
-        if (context.DaysLate <= 0)
+        decimal surcharge = 0m;
+        if (context.DaysLate > 14)
         {
-            result.AppliedRules.Add("Trả đúng hạn: Phí = 0 VNĐ.");
-            return result;
+            surcharge = 25000m;
+            rules.Add($"Phụ phí ngoại văn quá 14 ngày (bảo quản đặc thù): +{surcharge:N0} VND");
         }
 
-        decimal baseRate = 12000m;
-        decimal baseFee = context.DaysLate * baseRate;
-        result.BaseFee = baseFee;
-        result.AppliedRules.Add($"Sách Ngoại văn: {context.DaysLate} ngày x {baseRate:N0} VNĐ/ngày = {baseFee:N0} VNĐ.");
+        decimal finalFee = Math.Min(baseFee + surcharge, context.Book.BasePrice * 1.5m);
+        rules.Add($"Tổng phí cuối cùng: {finalFee:N0} VND (Giới hạn tối đa 150% giá bìa: {context.Book.BasePrice * 1.5m:N0} VND)");
 
-        // Phụ phí quy đổi ngoại tệ và nhập khẩu (10%)
-        decimal importSurcharge = baseFee * 0.10m;
-        result.AppliedRules.Add($"Phụ phí lưu kho & bảo quản sách nhập khẩu (10%): +{importSurcharge:N0} VNĐ.");
-
-        result.FinalFee = baseFee + importSurcharge;
-        return result;
+        return new FeeCalculationResult
+        {
+            StrategyName = StrategyName,
+            BaseFee = baseFee,
+            DiscountAmount = 0m,
+            FinalFee = finalFee,
+            AppliedRules = rules
+        };
     }
 }

@@ -1,11 +1,12 @@
-using Library.Business.Enums;
 using Library.Business.Models;
+using Library.DataAccess.Enums;
 
 namespace Library.Business.Strategies;
 
 public class StudentTextbookFeeStrategy : ILateFeeStrategy
 {
-    public int Priority => 70;
+    public string StrategyName => "Chính sách Hỗ trợ Sinh viên Mượn Giáo Trình";
+    public int Priority => 90;
 
     public bool CanApply(FeeCalculationContext context)
     {
@@ -14,40 +15,26 @@ public class StudentTextbookFeeStrategy : ILateFeeStrategy
 
     public FeeCalculationResult CalculateFee(FeeCalculationContext context)
     {
-        var result = new FeeCalculationResult
-        {
-            StrategyName = nameof(StudentTextbookFeeStrategy)
-        };
-
-        if (context.DaysLate <= 0)
-        {
-            result.AppliedRules.Add("Trả đúng hạn: Phí = 0 VNĐ.");
-            return result;
-        }
-
-        decimal dailyRate = 4000m;
+        var rules = new List<string>();
+        decimal dailyRate = 1500m; // Giá ưu đãi 50% so với 3000 thông thường
         decimal baseFee = context.DaysLate * dailyRate;
-        result.BaseFee = baseFee;
-        result.AppliedRules.Add($"Độc giả Sinh viên mượn Giáo trình: {context.DaysLate} ngày x {dailyRate:N0} VNĐ/ngày = {baseFee:N0} VNĐ.");
+        rules.Add($"Phí ưu đãi SV mượn giáo trình: {context.DaysLate} ngày x {dailyRate:N0} VND = {baseFee:N0} VND");
 
-        // Giảm 50% cho Sinh viên mượn Giáo trình học tập
-        decimal discount = baseFee * 0.50m;
-        result.DiscountAmount = discount;
-        decimal feeAfterDiscount = baseFee - discount;
-        result.AppliedRules.Add($"Ưu đãi Sinh viên học tập: Giảm 50% phí phạt (-{discount:N0} VNĐ).");
-
-        // Khống chế trần phí tối đa 50,000 VNĐ hỗ trợ sinh viên
-        decimal maxCap = 50000m;
-        if (feeAfterDiscount > maxCap)
+        decimal discount = 0m;
+        if (context.DaysLate <= 3)
         {
-            result.AppliedRules.Add($"Áp dụng chính sách khống chế trần phí tối đa cho Sinh viên: Giảm từ {feeAfterDiscount:N0} VNĐ xuống {maxCap:N0} VNĐ.");
-            result.FinalFee = maxCap;
-        }
-        else
-        {
-            result.FinalFee = feeAfterDiscount;
+            discount = baseFee;
+            rules.Add("Chính sách hỗ trợ học tập: Miễn phí hoàn toàn nếu chỉ trễ dưới 3 ngày.");
         }
 
-        return result;
+        decimal finalFee = baseFee - discount;
+        return new FeeCalculationResult
+        {
+            StrategyName = StrategyName,
+            BaseFee = baseFee,
+            DiscountAmount = discount,
+            FinalFee = finalFee,
+            AppliedRules = rules
+        };
     }
 }

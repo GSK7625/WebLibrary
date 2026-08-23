@@ -1,5 +1,5 @@
-using Library.Business.Entities;
-using Library.Business.Interfaces;
+using Library.DataAccess.Entities;
+using Library.DataAccess.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.DataAccess.Persistence.Repositories;
@@ -35,4 +35,3 @@ public class BookRepository : IBookRepository
         await _context.SaveChangesAsync();
     }
 }
-

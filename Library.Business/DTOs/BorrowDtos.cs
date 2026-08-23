@@ -1,23 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Library.Business.Enums;
+using Library.DataAccess.Enums;
 
 namespace Library.Business.DTOs;
-
-public class BorrowRequestDto
-{
-    [Required(ErrorMessage = "Id cua sach khong duoc de trong")]
-    [Range(1, int.MaxValue, ErrorMessage = "Id cua sach phai lon hon 0")]
-    public int BookId { get; set; }
-
-    [Required(ErrorMessage = "Ten nguoi muon khong duoc de trong")]
-    [StringLength(100, MinimumLength = 2, ErrorMessage = "Ten nguoi muon phai tu 2 den 100 ky tu")]
-    public string BorrowerName { get; set; } = string.Empty;
-
-    [Range(1, 365, ErrorMessage = "So ngay muon phai nam trong khoang tu 1 den 365 ngay")]
-    public int BorrowDays { get; set; } = 7;
-
-    public MemberType MemberType { get; set; } = MemberType.Standard;
-}
 
 public class BorrowRecordDto
 {
@@ -29,6 +13,18 @@ public class BorrowRecordDto
     public DateTime DueDate { get; set; }
     public DateTime? ReturnedDate { get; set; }
     public decimal? LateFee { get; set; }
+}
+
+public class BorrowRequestDto
+{
+    [Required(ErrorMessage = "Vui lòng nhập BookId")]
+    public int BookId { get; set; }
+
+    [Required(ErrorMessage = "Vui lòng nhập tên người mượn")]
+    public string BorrowerName { get; set; } = string.Empty;
+
+    [Range(1, 90, ErrorMessage = "Số ngày mượn phải từ 1 đến 90 ngày")]
+    public int BorrowDays { get; set; } = 14;
 }
 
 public class ReturnBookRequestDto
@@ -52,22 +48,4 @@ public class ReturnBookResponseDto
     public string FeeCalculationMethod { get; set; } = string.Empty;
     public List<string> AppliedRules { get; set; } = new();
     public string Message { get; set; } = string.Empty;
-}
-
-public class FeePreviewDto
-{
-    public int BookId { get; set; }
-    public string BookTitle { get; set; } = string.Empty;
-    public string BookType { get; set; } = string.Empty;
-    public decimal BasePrice { get; set; }
-    public MemberType MemberType { get; set; }
-    public string MemberTypeName => MemberType.ToString();
-    public int DaysLate { get; set; }
-    public decimal BaseFee { get; set; }
-    public decimal DiscountAmount { get; set; }
-    public decimal FinalFee { get; set; }
-    public string StrategyName { get; set; } = string.Empty;
-    public List<string> AppliedRules { get; set; } = new();
-    public string Method { get; set; } = string.Empty;
-    public string Note { get; set; } = string.Empty;
 }

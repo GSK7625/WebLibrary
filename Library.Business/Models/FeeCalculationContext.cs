@@ -1,5 +1,5 @@
-using Library.Business.Entities;
-using Library.Business.Enums;
+using Library.DataAccess.Entities;
+using Library.DataAccess.Enums;
 
 namespace Library.Business.Models;
 

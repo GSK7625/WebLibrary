@@ -74,6 +74,7 @@ public class BorrowApplicationService : IBorrowApplicationService
 
         book.IsBorrowed = true;
 
+        await _bookRepository.UpdateAsync(book);
         await _borrowRepository.AddAsync(record);
 
         return new BorrowRecordDto
@@ -130,6 +131,7 @@ public class BorrowApplicationService : IBorrowApplicationService
         record.LateFee = feeResult.FinalFee;
         book.IsBorrowed = false;
 
+        await _bookRepository.UpdateAsync(book);
         await _borrowRepository.UpdateAsync(record);
 
         return new ReturnBookResponseDto

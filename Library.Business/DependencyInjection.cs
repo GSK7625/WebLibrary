@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ILateFeeStrategy, StudentTextbookFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, RareBookFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, ForeignBookFeeStrategy>();
+        services.AddScoped<ILateFeeStrategy, AudioBookFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, MagazineFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, TextbookFeeStrategy>();
         services.AddScoped<ILateFeeStrategy, RegularBookFeeStrategy>();
